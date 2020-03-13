@@ -22,10 +22,12 @@ class ListView extends Component {
             this.setState({ rates: rateList })
            
         }).catch(function (error) {
+            this.setState({ errorMessage: error.message })
             console.log(error);
           });
     
     }
+
      changeBase = ((event) => {
         try {
         const base = event.target.value;
