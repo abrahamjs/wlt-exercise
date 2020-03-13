@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const formatDate = (date) => {
-    var d = new Date(date),
+    let d = new Date(date),
         month = '' + (d.getMonth() + 1),
         day = '' + d.getDate(),
         year = d.getFullYear();
@@ -21,6 +21,18 @@ export const getDaysList = (offset, days) => {
         lastTen.push(formatDate(previous));
     }
     return lastTen;
+}
+
+const differenceInDays = (date1, date2) => {
+    const diffTime = Math.abs(date2 - date1);
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+}
+
+export const getOffsetAndDays = ({ startDate, endDate }) => {
+    const today = new Date();
+    const offset = differenceInDays(today, endDate);
+    const days = differenceInDays(endDate, startDate);
+    return { offset, days };
 }
 
 export const fetchPricesForDays = (base, currency, days) => {

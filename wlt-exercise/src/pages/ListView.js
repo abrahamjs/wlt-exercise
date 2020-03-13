@@ -9,7 +9,8 @@ class ListView extends Component {
         this.state = {
             "hasError" : false, 
              rates : [],
-             base: "EUR"
+             base: "EUR",
+             errorMessage: ""
         };
     }
     
@@ -20,10 +21,13 @@ class ListView extends Component {
             const rateList = Object.keys(rates).map(key => ({ currency: key, value: rates[key] }));
             this.setState({ rates: rateList })
            
-        });
+        }).catch(function (error) {
+            console.log(error);
+          });
     
     }
      changeBase = ((event) => {
+        try {
         const base = event.target.value;
         axios.get("https://api.ratesapi.io/api/latest?base=" + base)
         .then(response => {
@@ -36,19 +40,29 @@ class ListView extends Component {
 
 
         console.log(base);
-    })
+         }catch (err) {
+            this.setState({
+            hasError: true,
+            errorMessage: err.message
+            })
+        }}) 
 
-    
-  
     render() {
         console.log("this base ::" + this.state.base);
         if (this.state.hasError) {
-            return (<p>Put any sort of error information here</p>);
+
+            return (
+                <div class="alert alert-danger" role="alert">
+                    Oops, something went wrong.
+                    {this.state.errorMessage}
+                </div>
+            )
         } else {
             return (
-                <div>
+                <div className="container" style={{ maxWidth: '600px' }}>
                     <label >Choose a base : </label>
                     <select id="currency" onChange={this.changeBase}>
+                        <option value="EUR">EUR</option>
                         <option value="GBP">GBP</option>
                         <option value="HKD">HKD</option>
                         <option value="IDR">IDR</option>
@@ -82,7 +96,23 @@ class ListView extends Component {
                         <option value="HUF">HUF</option>
                         <option value="AUD">AUD</option>
                     </select>
-                    {this.state.rates.map(rate => <div><Link to={`history?${queryString.stringify({ base: this.state.base, currency: rate.currency })}`}>>Currency: {rate.currency}, Value: {rate.value}</Link></div>)}
+                    <table className="table">
+                    <thead>
+                     <tr>
+                        <th scope="col">Currency</th>
+                        <th scope="col">Value in {this.state.base}</th>
+                     </tr>
+                    </thead>
+                    <tbody>
+                    {this.state.rates.map(({currency, value}) => (
+                    <tr key={currency}>
+                     <td>{currency}</td>
+                     <td>{value}</td>
+                     <td><Link to={`history?${queryString.stringify({ base: this.state.base, currency: currency })}`}><button type="button" className="btn btn-primary">price history</button></Link></td>
+                    </tr> 
+                    ))}   
+                    </tbody>
+                    </table>
                 </div>
             )
         }
